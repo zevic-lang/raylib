@@ -1,0 +1,50 @@
+module Raylib
+
+import Zevic.Test
+
+// These tests need no window: opening one needs a display, which CI machines usually lack.
+
+test "Color keeps its four channels" {
+    let c: Color = Color.New(1, 2, 3, 4)
+    Test.Equal(c.R, 1)
+    Test.Equal(c.G, 2)
+    Test.Equal(c.B, 3)
+    Test.Equal(c.A, 4)
+}
+
+test "WithAlpha changes only the alpha" {
+    let c: Color = Red.WithAlpha(128)
+    Test.Equal(c.R, Red.R)
+    Test.Equal(c.G, Red.G)
+    Test.Equal(c.B, Red.B)
+    Test.Equal(c.A, 128)
+}
+
+test "colors compare by value" {
+    Test.Equal(Color.New(0, 0, 0, 255), Black)
+    Test.NotEqual(White, Black)
+}
+
+test "the palette matches raylib" {
+    Test.Equal(RayWhite, Color.New(245, 245, 245, 255))
+    Test.Equal(Blank.A, 0)
+    Test.Equal(Gold.G, 203)
+}
+
+test "key numbers match raylib's KeyboardKey" {
+    Test.Equal(KeySpace, 32)
+    Test.Equal(KeyEscape, 256)
+    Test.Equal(KeyEnter, 257)
+    Test.Equal(KeyRight, 262)
+    Test.Equal(KeyLeft, 263)
+    Test.Equal(KeyDown, 264)
+    Test.Equal(KeyUp, 265)
+    Test.Equal(KeyA, 65)
+    Test.Equal(KeyW, 87)
+}
+
+test "mouse buttons match raylib's MouseButton" {
+    Test.Equal(MouseLeft, 0)
+    Test.Equal(MouseRight, 1)
+    Test.Equal(MouseMiddle, 2)
+}
