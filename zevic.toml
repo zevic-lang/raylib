@@ -1,0 +1,8 @@
+[package]
+name = "Raylib"
+version = "0.1.0"
+kind = "lib"
+zevic = ">=0.4"
+
+[native]
+libs = ["raylib", "m"]
