@@ -1,0 +1,245 @@
+module Raylib
+
+// raylib for Zevic: windows, 2D drawing, keyboard and mouse.
+//
+//     Raylib.InitWindow(800, 450, "hello")
+//     defer Raylib.CloseWindow()
+//     while (!Raylib.WindowShouldClose()) {
+//         Raylib.BeginDrawing()
+//         Raylib.ClearBackground(Raylib.RayWhite)
+//         Raylib.DrawText("Hello from Zevic", 190, 200, 20, Raylib.Gray)
+//         Raylib.EndDrawing()
+//     }
+//
+// Only Zevic types appear in the public API. Call everything from the main thread.
+
+extern "C" {
+    fn zv_rl_init_window(w: CInt, h: CInt, title: CString) -> CVoid
+    fn zv_rl_close_window() -> CVoid
+    fn zv_rl_window_should_close() -> CInt
+    fn zv_rl_is_window_ready() -> CInt
+    fn zv_rl_set_target_fps(fps: CInt) -> CVoid
+    fn zv_rl_screen_width() -> CInt
+    fn zv_rl_screen_height() -> CInt
+    fn zv_rl_frame_time() -> CDouble
+    fn zv_rl_time() -> CDouble
+    fn zv_rl_fps() -> CInt
+    fn zv_rl_begin_drawing() -> CVoid
+    fn zv_rl_end_drawing() -> CVoid
+    fn zv_rl_clear_background(r: CInt, g: CInt, b: CInt, a: CInt) -> CVoid
+    fn zv_rl_draw_text(text: CString, x: CInt, y: CInt, size: CInt, r: CInt, g: CInt, b: CInt, a: CInt) -> CVoid
+    fn zv_rl_measure_text(text: CString, size: CInt) -> CInt
+    fn zv_rl_draw_rect(x: CInt, y: CInt, w: CInt, h: CInt, r: CInt, g: CInt, b: CInt, a: CInt) -> CVoid
+    fn zv_rl_draw_rect_lines(x: CInt, y: CInt, w: CInt, h: CInt, r: CInt, g: CInt, b: CInt, a: CInt) -> CVoid
+    fn zv_rl_draw_circle(cx: CInt, cy: CInt, radius: CDouble, r: CInt, g: CInt, b: CInt, a: CInt) -> CVoid
+    fn zv_rl_draw_line(x1: CInt, y1: CInt, x2: CInt, y2: CInt, r: CInt, g: CInt, b: CInt, a: CInt) -> CVoid
+    fn zv_rl_draw_fps(x: CInt, y: CInt) -> CVoid
+    fn zv_rl_is_key_down(key: CInt) -> CInt
+    fn zv_rl_is_key_pressed(key: CInt) -> CInt
+    fn zv_rl_is_key_released(key: CInt) -> CInt
+    fn zv_rl_mouse_x() -> CInt
+    fn zv_rl_mouse_y() -> CInt
+    fn zv_rl_is_mouse_down(button: CInt) -> CInt
+    fn zv_rl_is_mouse_pressed(button: CInt) -> CInt
+}
+
+// ---- colors ----
+
+struct Color {
+    R: U8
+    G: U8
+    B: U8
+    A: U8
+
+    fn Init(r: U8, g: U8, b: U8, a: U8) {
+        this.R = r
+        this.G = g
+        this.B = b
+        this.A = a
+    }
+
+    /// The same color with another alpha (0 is transparent, 255 is opaque).
+    fn WithAlpha(a: U8) -> Color {
+        Color.New(this.R, this.G, this.B, a)
+    }
+}
+
+// the palette of raylib
+let LightGray: Color = Color.New(200, 200, 200, 255)
+let Gray: Color = Color.New(130, 130, 130, 255)
+let DarkGray: Color = Color.New(80, 80, 80, 255)
+let Yellow: Color = Color.New(253, 249, 0, 255)
+let Gold: Color = Color.New(255, 203, 0, 255)
+let Orange: Color = Color.New(255, 161, 0, 255)
+let Pink: Color = Color.New(255, 109, 194, 255)
+let Red: Color = Color.New(230, 41, 55, 255)
+let Maroon: Color = Color.New(190, 33, 55, 255)
+let Green: Color = Color.New(0, 228, 48, 255)
+let Lime: Color = Color.New(0, 158, 47, 255)
+let DarkGreen: Color = Color.New(0, 117, 44, 255)
+let SkyBlue: Color = Color.New(102, 191, 255, 255)
+let Blue: Color = Color.New(0, 121, 241, 255)
+let DarkBlue: Color = Color.New(0, 82, 172, 255)
+let Purple: Color = Color.New(200, 122, 255, 255)
+let Violet: Color = Color.New(135, 60, 190, 255)
+let DarkPurple: Color = Color.New(112, 31, 126, 255)
+let Beige: Color = Color.New(211, 176, 131, 255)
+let Brown: Color = Color.New(127, 106, 79, 255)
+let DarkBrown: Color = Color.New(76, 63, 47, 255)
+let White: Color = Color.New(255, 255, 255, 255)
+let Black: Color = Color.New(0, 0, 0, 255)
+let Blank: Color = Color.New(0, 0, 0, 0)
+let Magenta: Color = Color.New(255, 0, 255, 255)
+let RayWhite: Color = Color.New(245, 245, 245, 255)
+
+// ---- keys (the numbers of raylib's KeyboardKey) ----
+
+let KeySpace: I32 = 32
+let KeyEscape: I32 = 256
+let KeyEnter: I32 = 257
+let KeyRight: I32 = 262
+let KeyLeft: I32 = 263
+let KeyDown: I32 = 264
+let KeyUp: I32 = 265
+let KeyA: I32 = 65
+let KeyD: I32 = 68
+let KeyS: I32 = 83
+let KeyW: I32 = 87
+
+// ---- mouse buttons ----
+
+let MouseLeft: I32 = 0
+let MouseRight: I32 = 1
+let MouseMiddle: I32 = 2
+
+fn cint(c: U8) -> CInt {
+    c.ToI32().ToCInt()
+}
+
+fn flag(c: CInt) -> Bool {
+    c.ToI32() != 0
+}
+
+// ---- window ----
+
+/// Opens the window. Call it once, before anything else.
+fn InitWindow(width: I32, height: I32, title: String) {
+    zv_rl_init_window(width.ToCInt(), height.ToCInt(), title.ToC())
+}
+
+fn CloseWindow() {
+    zv_rl_close_window()
+}
+
+/// True after the user closes the window or presses Esc.
+fn WindowShouldClose() -> Bool {
+    flag(zv_rl_window_should_close())
+}
+
+fn IsWindowReady() -> Bool {
+    flag(zv_rl_is_window_ready())
+}
+
+fn SetTargetFps(fps: I32) {
+    zv_rl_set_target_fps(fps.ToCInt())
+}
+
+fn ScreenWidth() -> I32 {
+    zv_rl_screen_width().ToI32()
+}
+
+fn ScreenHeight() -> I32 {
+    zv_rl_screen_height().ToI32()
+}
+
+// ---- time ----
+
+/// Seconds the last frame took.
+fn FrameTime() -> F64 {
+    zv_rl_frame_time().ToF64()
+}
+
+/// Seconds since the window was opened.
+fn Time() -> F64 {
+    zv_rl_time().ToF64()
+}
+
+fn Fps() -> I32 {
+    zv_rl_fps().ToI32()
+}
+
+// ---- drawing (between BeginDrawing and EndDrawing) ----
+
+fn BeginDrawing() {
+    zv_rl_begin_drawing()
+}
+
+fn EndDrawing() {
+    zv_rl_end_drawing()
+}
+
+fn ClearBackground(c: Color) {
+    zv_rl_clear_background(cint(c.R), cint(c.G), cint(c.B), cint(c.A))
+}
+
+fn DrawText(text: String, x: I32, y: I32, size: I32, c: Color) {
+    zv_rl_draw_text(text.ToC(), x.ToCInt(), y.ToCInt(), size.ToCInt(), cint(c.R), cint(c.G), cint(c.B), cint(c.A))
+}
+
+/// The width of the text in pixels with the default font. Needs an open window.
+fn MeasureText(text: String, size: I32) -> I32 {
+    zv_rl_measure_text(text.ToC(), size.ToCInt()).ToI32()
+}
+
+fn DrawRect(x: I32, y: I32, width: I32, height: I32, c: Color) {
+    zv_rl_draw_rect(x.ToCInt(), y.ToCInt(), width.ToCInt(), height.ToCInt(), cint(c.R), cint(c.G), cint(c.B), cint(c.A))
+}
+
+fn DrawRectLines(x: I32, y: I32, width: I32, height: I32, c: Color) {
+    zv_rl_draw_rect_lines(x.ToCInt(), y.ToCInt(), width.ToCInt(), height.ToCInt(), cint(c.R), cint(c.G), cint(c.B), cint(c.A))
+}
+
+fn DrawCircle(cx: I32, cy: I32, radius: F64, c: Color) {
+    zv_rl_draw_circle(cx.ToCInt(), cy.ToCInt(), radius.ToCDouble(), cint(c.R), cint(c.G), cint(c.B), cint(c.A))
+}
+
+fn DrawLine(x1: I32, y1: I32, x2: I32, y2: I32, c: Color) {
+    zv_rl_draw_line(x1.ToCInt(), y1.ToCInt(), x2.ToCInt(), y2.ToCInt(), cint(c.R), cint(c.G), cint(c.B), cint(c.A))
+}
+
+fn DrawFps(x: I32, y: I32) {
+    zv_rl_draw_fps(x.ToCInt(), y.ToCInt())
+}
+
+// ---- keyboard and mouse ----
+
+/// True while the key is held down.
+fn IsKeyDown(key: I32) -> Bool {
+    flag(zv_rl_is_key_down(key.ToCInt()))
+}
+
+/// True once, in the frame the key went down.
+fn IsKeyPressed(key: I32) -> Bool {
+    flag(zv_rl_is_key_pressed(key.ToCInt()))
+}
+
+/// True once, in the frame the key came up.
+fn IsKeyReleased(key: I32) -> Bool {
+    flag(zv_rl_is_key_released(key.ToCInt()))
+}
+
+fn MouseX() -> I32 {
+    zv_rl_mouse_x().ToI32()
+}
+
+fn MouseY() -> I32 {
+    zv_rl_mouse_y().ToI32()
+}
+
+fn IsMouseDown(button: I32) -> Bool {
+    flag(zv_rl_is_mouse_down(button.ToCInt()))
+}
+
+fn IsMousePressed(button: I32) -> Bool {
+    flag(zv_rl_is_mouse_pressed(button.ToCInt()))
+}
