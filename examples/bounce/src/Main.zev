@@ -1,0 +1,55 @@
+module Main
+
+import Raylib
+
+// A ball that bounces off the walls. Arrow keys change its speed, Space resets it, Esc quits.
+
+fn Main() {
+    let width: I32 = 800
+    let height: I32 = 450
+    let radius: I32 = 20
+
+    Raylib.InitWindow(width, height, "Zevic + raylib")
+    defer Raylib.CloseWindow()
+    Raylib.SetTargetFps(60)
+
+    mut x: I32 = width / 2
+    mut y: I32 = height / 2
+    mut vx: I32 = 4
+    mut vy: I32 = 3
+    mut bounces: I32 = 0
+
+    while (!Raylib.WindowShouldClose()) {
+        if (Raylib.IsKeyPressed(Raylib.KeyUp)) {
+            vx = vx * 2
+            vy = vy * 2
+        }
+        if (Raylib.IsKeyPressed(Raylib.KeyDown) && vx.Abs() > 1) {
+            vx = vx / 2
+            vy = vy / 2
+        }
+        if (Raylib.IsKeyPressed(Raylib.KeySpace)) {
+            x = width / 2
+            y = height / 2
+            bounces = 0
+        }
+
+        x += vx
+        y += vy
+        if (x < radius || x > width - radius) {
+            vx = -vx
+            bounces += 1
+        }
+        if (y < radius || y > height - radius) {
+            vy = -vy
+            bounces += 1
+        }
+
+        Raylib.BeginDrawing()
+        Raylib.ClearBackground(Raylib.RayWhite)
+        Raylib.DrawCircle(x, y, radius.ToF64(), Raylib.Maroon)
+        Raylib.DrawText("bounces: ${bounces}", 10, 10, 20, Raylib.DarkGray)
+        Raylib.DrawFps(width - 90, 10)
+        Raylib.EndDrawing()
+    }
+}
