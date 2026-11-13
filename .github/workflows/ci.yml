@@ -1,0 +1,129 @@
+name: ci
+
+# Every push to main and every pull request builds raylib and zevic and runs the tests on Linux and macOS.
+# On Linux the bounce example also runs under a virtual display, and a screenshot of it is kept as an artifact.
+#
+# A push to main that passes the tests also releases: when the `version` in zevic.toml has no tag yet,
+# the release job creates the tag vX.Y.Z and a GitHub release (the notes are the `## X.Y.Z` section of CHANGELOG.md).
+# To release: raise `version` in zevic.toml, add a `## X.Y.Z` section to CHANGELOG.md, push to main.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # the zevic that builds and tests the package, and the raylib that it is linked with
+  ZEVIC_REF: v0.4.1
+  RAYLIB_REF: "5.5"
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    env:
+      ZEVIC_HOME: ${{ github.workspace }}/zevic
+      ZEVIC: ${{ github.workspace }}/zevic/build/zevic
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: zevic-lang/zevic
+          ref: ${{ env.ZEVIC_REF }}
+          path: zevic
+
+      # zevic turns Zevic into LLVM IR and asks clang to build it; macOS has clang already
+      - name: Install clang, the libraries raylib needs and a virtual display (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake libgl1-mesa-dev libx11-dev libxrandr-dev libxi-dev \
+            libxcursor-dev libxinerama-dev libxkbcommon-dev libwayland-dev \
+            xvfb imagemagick libgl1-mesa-dri
+
+      # there is no apt package, so raylib is built from its source, the same way on both systems
+      - name: Build raylib
+        run: |
+          git clone --depth 1 --branch "$RAYLIB_REF" https://github.com/raysan5/raylib.git raylib-src
+          cmake -S raylib-src -B raylib-build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
+            -DBUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/raylib"
+          cmake --build raylib-build -j 4
+          cmake --install raylib-build
+          {
+            echo "C_INCLUDE_PATH=$HOME/raylib/include"
+            echo "LIBRARY_PATH=$HOME/raylib/lib"
+            echo "LD_LIBRARY_PATH=$HOME/raylib/lib"
+          } >> "$GITHUB_ENV"
+
+      - name: Build zevic
+        run: make -C zevic
+
+      - name: Test
+        run: zevic/build/zevpm2 test
+
+      - name: Build the bounce example
+        working-directory: examples/bounce
+        run: ../../zevic/build/zevpm2 build
+
+      # raylib draws with OpenGL: the software renderer of Mesa and a virtual display are enough to check the drawing
+      - name: Run the bounce example under a virtual display (Linux)
+        if: runner.os == 'Linux'
+        working-directory: examples/bounce
+        run: |
+          export LIBGL_ALWAYS_SOFTWARE=1
+          xvfb-run -a -s "-screen 0 800x450x24" sh -c './build/Bounce > bounce.log 2>&1 & P=$!; sleep 4; import -window root bounce.png; kill $P; wait $P || true'
+          COLORS="$(identify -format %k bounce.png)"
+          echo "colors in the screenshot: $COLORS"
+          # a blank window has one color; the background, the ball and the two texts give four
+          test "$COLORS" -ge 3
+
+      - name: Keep the screenshot
+        if: runner.os == 'Linux' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bounce-screenshot
+          path: |
+            examples/bounce/bounce.png
+            examples/bounce/bounce.log
+          if-no-files-found: ignore
+
+  release:
+    name: release
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release the version in zevic.toml if it has no tag yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NAME="$(sed -n 's/^name = "\(.*\)"/\1/p' zevic.toml | head -n 1)"
+          VERSION="$(sed -n 's/^version = "\(.*\)"/\1/p' zevic.toml | head -n 1)"
+          TAG="v$VERSION"
+          if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+            echo "$TAG already exists: nothing to release"
+            exit 0
+          fi
+          # the changelog has to describe the version that is released
+          grep -q "^## $VERSION\$" CHANGELOG.md
+          awk -v v="$VERSION" '$0 == "## " v { on = 1; next } /^## / { on = 0 } on' CHANGELOG.md > notes.md
+          git archive --format=tar.gz --prefix="$NAME-$VERSION/" -o "$NAME-$VERSION.tar.gz" HEAD
+          gh release create "$TAG" "$NAME-$VERSION.tar.gz" --target "$GITHUB_SHA" --title "$TAG" --notes-file notes.md
+          echo "released $TAG"
