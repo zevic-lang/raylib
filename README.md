@@ -6,26 +6,36 @@ This first version covers the basics. Textures, sound, fonts and 3D are not wrap
 
 ## Install
 
-Needs raylib 5 and its development files (`brew install raylib`, or build it from source; on Debian and Ubuntu there may be no package).
+Needs raylib 5 and its development files. Ubuntu has no package for it, so build it (this is what CI does; macOS can also use `brew install raylib`):
 
 ```
-zevpm get zevic-lang/zevic-raylib@v0.1.0
+git clone --depth 1 --branch 5.5 https://github.com/raysan5/raylib.git
+cmake -S raylib -B raylib/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/raylib"
+cmake --build raylib/build -j 4 && cmake --install raylib/build
+```
+
+On Linux the build needs `cmake`, `libgl1-mesa-dev`, `libx11-dev`, `libxrandr-dev`, `libxi-dev`, `libxcursor-dev`, `libxinerama-dev` and `libxkbcommon-dev`.
+
+Then add the package to your project:
+
+```
+zevpm get zevic-lang/raylib@v0.1.0
 ```
 
 or in `zevic.toml`:
 
 ```
 [deps]
-Raylib = { git = "https://github.com/zevic-lang/zevic-raylib", tag = "v0.1.0" }
+Raylib = { git = "https://github.com/zevic-lang/raylib", tag = "v0.1.0" }
 ```
 
-If raylib is not in a standard place, add its folder in your own `zevic.toml`:
+If raylib is not in a standard place (`/usr/local` for example), tell clang where it is before you build and run:
 
 ```
-[native]
-lib_dirs = ["/opt/raylib/lib"]
-include_dirs = ["/opt/raylib/include"]
+export C_INCLUDE_PATH="$HOME/raylib/include" LIBRARY_PATH="$HOME/raylib/lib" LD_LIBRARY_PATH="$HOME/raylib/lib"
 ```
+
+(`zevic.toml` can only name the library with `[native] libs`; it has no keys for folders.)
 
 ## Use
 
@@ -50,6 +60,8 @@ fn Main() {
 
 A bigger one is in `examples/bounce`: `cd examples/bounce && zevpm run`.
 
+![bounce](docs/bounce.png)
+
 ## API
 
 | | |
@@ -72,7 +84,11 @@ Call everything from the main thread, and only between `InitWindow` and `CloseWi
 zevpm test
 ```
 
-The tests need no window. Opening one needs a display, so the drawing functions are checked by running `examples/bounce` by hand.
+The tests need no window. Opening one needs a display, so CI checks the drawing by running `examples/bounce` for a few seconds under a virtual display (Xvfb with Mesa's software renderer) and looking at a screenshot of it (the picture above is one). It runs on Linux; macOS builds and tests only.
+
+## Releases
+
+A push to `main` that passes the tests in CI is released by the workflow when `version` in `zevic.toml` has no tag yet: it creates the tag `vX.Y.Z` and a GitHub release whose notes are the `## X.Y.Z` section of `CHANGELOG.md`. To release, raise `version`, add that section, and push to `main`.
 
 ## License
 
