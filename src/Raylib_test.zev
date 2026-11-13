@@ -3,6 +3,8 @@ module Raylib
 import Zevic.Test
 
 // These tests need no window: opening one needs a display, which CI machines usually lack.
+//
+// `Test.Equal` needs `Equatable` to be written out for a struct, so colors are compared with `==`.
 
 test "Color keeps its four channels" {
     let c: Color = Color.New(1, 2, 3, 4)
@@ -13,22 +15,23 @@ test "Color keeps its four channels" {
 }
 
 test "WithAlpha changes only the alpha" {
-    let c: Color = Red.WithAlpha(128)
-    Test.Equal(c.R, Red.R)
-    Test.Equal(c.G, Red.G)
-    Test.Equal(c.B, Red.B)
+    let red: Color = Red()
+    let c: Color = red.WithAlpha(128)
+    Test.Equal(c.R, red.R)
+    Test.Equal(c.G, red.G)
+    Test.Equal(c.B, red.B)
     Test.Equal(c.A, 128)
 }
 
 test "colors compare by value" {
-    Test.Equal(Color.New(0, 0, 0, 255), Black)
-    Test.NotEqual(White, Black)
+    Test.True(Color.New(0, 0, 0, 255) == Black())
+    Test.True(White() != Black())
 }
 
 test "the palette matches raylib" {
-    Test.Equal(RayWhite, Color.New(245, 245, 245, 255))
-    Test.Equal(Blank.A, 0)
-    Test.Equal(Gold.G, 203)
+    Test.True(RayWhite() == Color.New(245, 245, 245, 255))
+    Test.Equal(Blank().A, 0)
+    Test.Equal(Gold().G, 203)
 }
 
 test "key numbers match raylib's KeyboardKey" {
