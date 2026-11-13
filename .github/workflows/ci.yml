@@ -34,9 +34,9 @@ jobs:
       ZEVIC_HOME: ${{ github.workspace }}/zevic
       ZEVIC: ${{ github.workspace }}/zevic/build/zevic
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: zevic-lang/zevic
           ref: ${{ env.ZEVIC_REF }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: Keep the screenshot
         if: runner.os == 'Linux' && always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bounce-screenshot
           path: |
@@ -114,7 +114,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
