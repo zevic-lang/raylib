@@ -41,8 +41,8 @@ fn Main() {
 
     while (!Raylib.WindowShouldClose()) {
         Raylib.BeginDrawing()
-        Raylib.ClearBackground(Raylib.RayWhite)
-        Raylib.DrawText("Hello from Zevic", 190, 200, 20, Raylib.Gray)
+        Raylib.ClearBackground(Raylib.RayWhite())
+        Raylib.DrawText("Hello from Zevic", 190, 200, 20, Raylib.Gray())
         Raylib.EndDrawing()
     }
 }
@@ -60,7 +60,9 @@ A bigger one is in `examples/bounce`: `cd examples/bounce && zevpm run`.
 | `DrawText` `MeasureText` `DrawRect` `DrawRectLines` `DrawCircle` `DrawLine` `DrawFps` | drawing |
 | `IsKeyDown(k)` `IsKeyPressed(k)` `IsKeyReleased(k)` `KeySpace` `KeyEscape` `KeyEnter` `KeyUp` `KeyDown` `KeyLeft` `KeyRight` `KeyA` `KeyD` `KeyS` `KeyW` | keyboard |
 | `MouseX()` `MouseY()` `IsMouseDown(b)` `IsMousePressed(b)` `MouseLeft` `MouseRight` `MouseMiddle` | mouse |
-| `Color.New(r, g, b, a)` `c.WithAlpha(a)` and the palette (`Red`, `Blue`, `RayWhite`, ...) | colors |
+| `Color.New(r, g, b, a)` `c.WithAlpha(a)` and the palette as functions (`Red()`, `Blue()`, `RayWhite()`, ...) | colors |
+
+The palette is made of functions (`Raylib.Red()`), not constants: the compiler reads the value of a constant in the caller's module, where `Color` is not in scope.
 
 Call everything from the main thread, and only between `InitWindow` and `CloseWindow`.
 
