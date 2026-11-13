@@ -51,12 +51,14 @@ jobs:
             libxcursor-dev libxinerama-dev libxkbcommon-dev libwayland-dev \
             xvfb imagemagick libgl1-mesa-dri
 
-      # there is no apt package, so raylib is built from its source, the same way on both systems
+      # there is no apt package, so raylib is built from its source, the same way on both systems.
+      # CMAKE_INSTALL_NAME_DIR gives the macOS library an absolute name: with the default `@rpath/...` name
+      # a program linked with `-lraylib` has no rpath and dyld aborts when it starts (Linux uses LD_LIBRARY_PATH).
       - name: Build raylib
         run: |
           git clone --depth 1 --branch "$RAYLIB_REF" https://github.com/raysan5/raylib.git raylib-src
           cmake -S raylib-src -B raylib-build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
-            -DBUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/raylib"
+            -DBUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/raylib" -DCMAKE_INSTALL_NAME_DIR="$HOME/raylib/lib"
           cmake --build raylib-build -j 4
           cmake --install raylib-build
           {
@@ -64,6 +66,12 @@ jobs:
             echo "LIBRARY_PATH=$HOME/raylib/lib"
             echo "LD_LIBRARY_PATH=$HOME/raylib/lib"
           } >> "$GITHUB_ENV"
+
+      - name: Show the name the raylib library is found by (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          ls "$HOME/raylib/lib"
+          echo "::notice title=raylib install name::$(otool -D "$HOME/raylib/lib/libraylib.dylib" | tail -n 1)"
 
       - name: Build zevic
         run: make -C zevic
