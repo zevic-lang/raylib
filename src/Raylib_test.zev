@@ -34,6 +34,11 @@ test "the palette matches raylib" {
     Test.Equal(Gold().G, 203)
 }
 
+// The one call into raylib that is safe without a window: it proves that the library is linked and the C layer works.
+test "no window is ready before InitWindow" {
+    Test.Equal(IsWindowReady(), false)
+}
+
 test "key numbers match raylib's KeyboardKey" {
     Test.Equal(KeySpace, 32)
     Test.Equal(KeyEscape, 256)
