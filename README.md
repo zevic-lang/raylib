@@ -10,7 +10,7 @@ Needs raylib 5 and its development files. Ubuntu has no package for it, so build
 
 ```
 git clone --depth 1 --branch 5.5 https://github.com/raysan5/raylib.git
-cmake -S raylib -B raylib/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/raylib"
+cmake -S raylib -B raylib/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX="$HOME/raylib" -DCMAKE_INSTALL_NAME_DIR="$HOME/raylib/lib"
 cmake --build raylib/build -j 4 && cmake --install raylib/build
 ```
 
