@@ -46,9 +46,9 @@ fn Main() {
         }
 
         Raylib.BeginDrawing()
-        Raylib.ClearBackground(Raylib.RayWhite)
-        Raylib.DrawCircle(x, y, radius.ToF64(), Raylib.Maroon)
-        Raylib.DrawText("bounces: ${bounces}", 10, 10, 20, Raylib.DarkGray)
+        Raylib.ClearBackground(Raylib.RayWhite())
+        Raylib.DrawCircle(x, y, radius.ToF64(), Raylib.Maroon())
+        Raylib.DrawText("bounces: ${bounces}", 10, 10, 20, Raylib.DarkGray())
         Raylib.DrawFps(width - 90, 10)
         Raylib.EndDrawing()
     }

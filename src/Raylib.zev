@@ -6,8 +6,8 @@ module Raylib
 //     defer Raylib.CloseWindow()
 //     while (!Raylib.WindowShouldClose()) {
 //         Raylib.BeginDrawing()
-//         Raylib.ClearBackground(Raylib.RayWhite)
-//         Raylib.DrawText("Hello from Zevic", 190, 200, 20, Raylib.Gray)
+//         Raylib.ClearBackground(Raylib.RayWhite())
+//         Raylib.DrawText("Hello from Zevic", 190, 200, 20, Raylib.Gray())
 //         Raylib.EndDrawing()
 //     }
 //
@@ -64,33 +64,33 @@ struct Color {
     }
 }
 
-// the palette of raylib
-let LightGray: Color = Color.New(200, 200, 200, 255)
-let Gray: Color = Color.New(130, 130, 130, 255)
-let DarkGray: Color = Color.New(80, 80, 80, 255)
-let Yellow: Color = Color.New(253, 249, 0, 255)
-let Gold: Color = Color.New(255, 203, 0, 255)
-let Orange: Color = Color.New(255, 161, 0, 255)
-let Pink: Color = Color.New(255, 109, 194, 255)
-let Red: Color = Color.New(230, 41, 55, 255)
-let Maroon: Color = Color.New(190, 33, 55, 255)
-let Green: Color = Color.New(0, 228, 48, 255)
-let Lime: Color = Color.New(0, 158, 47, 255)
-let DarkGreen: Color = Color.New(0, 117, 44, 255)
-let SkyBlue: Color = Color.New(102, 191, 255, 255)
-let Blue: Color = Color.New(0, 121, 241, 255)
-let DarkBlue: Color = Color.New(0, 82, 172, 255)
-let Purple: Color = Color.New(200, 122, 255, 255)
-let Violet: Color = Color.New(135, 60, 190, 255)
-let DarkPurple: Color = Color.New(112, 31, 126, 255)
-let Beige: Color = Color.New(211, 176, 131, 255)
-let Brown: Color = Color.New(127, 106, 79, 255)
-let DarkBrown: Color = Color.New(76, 63, 47, 255)
-let White: Color = Color.New(255, 255, 255, 255)
-let Black: Color = Color.New(0, 0, 0, 255)
-let Blank: Color = Color.New(0, 0, 0, 0)
-let Magenta: Color = Color.New(255, 0, 255, 255)
-let RayWhite: Color = Color.New(245, 245, 245, 255)
+// the palette of raylib (functions, so that they work from any module: a constant would be read in the caller's scope)
+fn LightGray() -> Color { Color.New(200, 200, 200, 255) }
+fn Gray() -> Color { Color.New(130, 130, 130, 255) }
+fn DarkGray() -> Color { Color.New(80, 80, 80, 255) }
+fn Yellow() -> Color { Color.New(253, 249, 0, 255) }
+fn Gold() -> Color { Color.New(255, 203, 0, 255) }
+fn Orange() -> Color { Color.New(255, 161, 0, 255) }
+fn Pink() -> Color { Color.New(255, 109, 194, 255) }
+fn Red() -> Color { Color.New(230, 41, 55, 255) }
+fn Maroon() -> Color { Color.New(190, 33, 55, 255) }
+fn Green() -> Color { Color.New(0, 228, 48, 255) }
+fn Lime() -> Color { Color.New(0, 158, 47, 255) }
+fn DarkGreen() -> Color { Color.New(0, 117, 44, 255) }
+fn SkyBlue() -> Color { Color.New(102, 191, 255, 255) }
+fn Blue() -> Color { Color.New(0, 121, 241, 255) }
+fn DarkBlue() -> Color { Color.New(0, 82, 172, 255) }
+fn Purple() -> Color { Color.New(200, 122, 255, 255) }
+fn Violet() -> Color { Color.New(135, 60, 190, 255) }
+fn DarkPurple() -> Color { Color.New(112, 31, 126, 255) }
+fn Beige() -> Color { Color.New(211, 176, 131, 255) }
+fn Brown() -> Color { Color.New(127, 106, 79, 255) }
+fn DarkBrown() -> Color { Color.New(76, 63, 47, 255) }
+fn White() -> Color { Color.New(255, 255, 255, 255) }
+fn Black() -> Color { Color.New(0, 0, 0, 255) }
+fn Blank() -> Color { Color.New(0, 0, 0, 0) }
+fn Magenta() -> Color { Color.New(255, 0, 255, 255) }
+fn RayWhite() -> Color { Color.New(245, 245, 245, 255) }
 
 // ---- keys (the numbers of raylib's KeyboardKey) ----
 
