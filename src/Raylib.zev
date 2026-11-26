@@ -46,10 +46,10 @@ extern "C" {
 // ---- colors ----
 
 struct Color {
-    R: U8
-    G: U8
-    B: U8
-    A: U8
+    mut R: U8
+    mut G: U8
+    mut B: U8
+    mut A: U8
 
     fn Init(r: U8, g: U8, b: U8, a: U8) {
         this.R = r
