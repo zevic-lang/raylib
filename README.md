@@ -19,14 +19,14 @@ On Linux the build needs `cmake`, `libgl1-mesa-dev`, `libx11-dev`, `libxrandr-de
 Then add the package to your project:
 
 ```
-zevpm get zevic-lang/raylib@v0.1.0
+zevpm get zevic-lang/raylib@v0.5.0
 ```
 
 or in `zevic.toml`:
 
 ```
 [deps]
-Raylib = { git = "https://github.com/zevic-lang/raylib", tag = "v0.1.0" }
+Raylib = { git = "https://github.com/zevic-lang/raylib", tag = "v0.5.0" }
 ```
 
 If raylib is not in a standard place (`/usr/local` for example), tell clang where it is before you build and run:
