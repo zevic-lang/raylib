@@ -77,11 +77,11 @@ jobs:
         run: make -C zevic
 
       - name: Test
-        run: zevic/build/zevpm2 test
+        run: zevic/build/zevpm test
 
       - name: Build the bounce example
         working-directory: examples/bounce
-        run: ../../zevic/build/zevpm2 build
+        run: ../../zevic/build/zevpm build
 
       # raylib draws with OpenGL: the software renderer of Mesa and a virtual display are enough to check the drawing
       - name: Run the bounce example under a virtual display (Linux)
